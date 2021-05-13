@@ -3,9 +3,18 @@ from bs4 import BeautifulSoup
 import requests
 import re
 import time
+import os
 
+from Config import SENDER, RCPT
 
 url = "https://www.prullenbakvaccin.nl/"
+
+
+def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=True):
+    syscall = f'signal-cli -u {sender} send -m \"{msg}\" {RCPT}'
+    if debug:
+        print(syscall)
+    #os.system(syscall)
 
 
 def poll_site(location="gouda"):
@@ -36,10 +45,9 @@ def parse_priklocatie(s):
 
 priklocatie_status = {}
 
-#while True:
-for _ in range(10):
-    print('.', end='')
-
+print('Start...')
+while True:
+    
     soup = poll_site("gouda")
     if soup:
         priklocaties = soup.find_all("div", {"class": "card-body"})
@@ -52,14 +60,15 @@ for _ in range(10):
                 status = priklocatie_status.get(id, None)
                 if status is None:
                     print('Nieuwe locatie binnen fietsafstand.', id, dist)
-                    print(priklocatie)
+                    send_signal_msg('Nieuwe locatie: '+priklocatie)
                 elif status == hash:
                     continue
                 priklocatie_status[id] = hash 
                 print('Locatie status is veranderd!', id, priklocatie)
-                    
-    print('.', end='')
-    time.sleep(5)
+                send_signal_msg('Changed: '+priklocatie)
+
+    print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))    
+    time.sleep(300)
 
 
 
