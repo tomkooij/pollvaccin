@@ -2,21 +2,22 @@
 from bs4 import BeautifulSoup
 import requests
 import re
+import time
 
 
 url = "https://www.prullenbakvaccin.nl/"
-posturl = "https://www.prullenbakvaccin.nl#location-selector"
 
 
-def poll_site(location="1000"):
+def poll_site(location="gouda"):
     """poll site for location and return list of locations"""
-    client = requests.session()
-    r = client.get(url)
-    soup = BeautifulSoup(r.text, 'html.parser')
-    token = soup.form.input['value']
-    data = {"_token": token, "location": location}
+    
+    try:
+        r = requests.get(url + location)
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as e:
+        print (e.response.text)
+        return None
 
-    r = client.post(posturl, data)
     soup = BeautifulSoup(r.text, 'html.parser')
     return soup
 
@@ -33,17 +34,33 @@ def parse_priklocatie(s):
     return id, dist
 
 
-## voor debuggen zonder de hele tijd de site te pollen
-soup = poll_site("gouda")
-priklocaties = soup.find_all("div", {"class": "card-body"})
+priklocatie_status = {}
 
-for priklocatie in priklocaties:
-    priklocatie = priklocatie.text.replace('\n', ' ')
+#while True:
+for _ in range(10):
+    print('.', end='')
 
-    if "Heeft geen vaccins" not in priklocatie:
-        print(priklocatie)
-        id, dist = parse_priklocatie(priklocatie)
-        if dist < 5:
-            print('Vaccin beschikbaar binnen fietsafstand!!!')
-            print(priklocatie)
+    soup = poll_site("gouda")
+    if soup:
+        priklocaties = soup.find_all("div", {"class": "card-body"})
+
+        for priklocatie in priklocaties:
+            priklocatie = priklocatie.text.replace('\n', ' ')
+            id, dist = parse_priklocatie(priklocatie)
+            if dist < 5:
+                hash = priklocatie.replace(' ', '')
+                status = priklocatie_status.get(id, None)
+                if status is None:
+                    print('Nieuwe locatie binnen fietsafstand.', id, dist)
+                    print(priklocatie)
+                elif status == hash:
+                    continue
+                priklocatie_status[id] = hash 
+                print('Locatie status is veranderd!', id, priklocatie)
+                    
+    print('.', end='')
+    time.sleep(5)
+
+
+
     
