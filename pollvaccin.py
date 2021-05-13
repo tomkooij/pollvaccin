@@ -19,7 +19,7 @@ def daytime():
     
 
 def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=True):
-    syscall = f'signal-cli -u {sender} send -m \"{msg}\" {RCPT}'
+    syscall = f'signal-cli -u {sender} send -m \"{msg}\" {rcpt}'
     if debug:
         print(syscall)
     #os.system(syscall)
