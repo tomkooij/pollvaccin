@@ -4,11 +4,19 @@ import requests
 import re
 import time
 import os
+import datetime
+
 
 from Config import SENDER, RCPT
 
 url = "https://www.prullenbakvaccin.nl/"
 
+
+def daytime():
+    now = datetime.datetime.now()
+    now_time = now.time()
+    return now_time < datetime.time(20,00) and now_time >= datetime.time(7,00) 
+    
 
 def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=True):
     syscall = f'signal-cli -u {sender} send -m \"{msg}\" {RCPT}'
@@ -47,7 +55,12 @@ priklocatie_status = {}
 
 print('Start...')
 while True:
-    
+
+    if not daytime():
+        print('geen vaccins in de nacht... morgen weer verder!')
+        time.sleep(3600)
+        continue
+
     soup = poll_site("gouda")
     if soup:
         priklocaties = soup.find_all("div", {"class": "card-body"})
@@ -65,7 +78,7 @@ while True:
                     continue
                 priklocatie_status[id] = hash 
                 print('Locatie status is veranderd!', id, priklocatie)
-                send_signal_msg('Changed: '+priklocatie)
+                send_signal_msg(time.ctime()+priklocatie)
 
     print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))    
     time.sleep(300)
