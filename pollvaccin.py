@@ -67,6 +67,8 @@ while True:
 
         for priklocatie in priklocaties:
             priklocatie = priklocatie.text.replace('\n', ' ')
+            priklocatie = priklocatie.replace('Gegevens pas beschikbaar tijdens prikmoment.', '')
+
             id, dist = parse_priklocatie(priklocatie)
             if dist < 5:
                 hash = priklocatie.replace(' ', '')
