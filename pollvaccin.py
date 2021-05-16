@@ -5,6 +5,7 @@ import re
 import time
 import os
 import datetime
+from requests.models import HTTPError
 
 
 from Config import SENDER, RCPT
