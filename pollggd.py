@@ -7,7 +7,7 @@ import os
 from requests.models import HTTPError
 
 from Config import SENDER, RCPT
-
+from delay import calc_delay   
 
 def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=True):
     syscall = f'signal-cli -u {sender} send -m \"{msg}\" {rcpt}'
@@ -24,7 +24,6 @@ def is_geboortejaar_aan_de_beurt(jaar):
         r.raise_for_status()
     except HTTPError as e:
         print(e)
-        time.sleep(30)
         return None
 
     result = r.json()
@@ -42,14 +41,17 @@ for geboortejaar in range(1961, 1980):
         r = is_geboortejaar_aan_de_beurt(geboortejaar)
         if r is None:
             print('Network error, nog een keertje')
+            time.sleep(60)
             continue
         if not r:
             print(f'{geboortejaar} is nog niet aan de beurt')
-            time.sleep(60)
+            delay = calc_delay(300)  # slaap 's nachts.
+            print(f'Sleeping {delay} seconds.')
+            time.sleep(delay)
             continue 
         print(f'{geboortejaar} is NU AAN DE BEURT!!!!')
         send_signal_msg(f'{time.ctime()} Jaargang {geboortejaar} kan nu een afspraak maken!')
-        if geboortejaar == 1964:
+        if geboortejaar == 1975:
             for delay in range(1, 10):
                 # ALERT ALERT!
                 send_signal_msg(f'{time.ctime()} {geboortejaar} is aan de beurt. MAAK NU EEN VACCINATIE AFSPRAAK!!')
