@@ -56,5 +56,6 @@ for geboortejaar in range(1961, 1980):
                 # ALERT ALERT!
                 send_signal_msg(f'{time.ctime()} {geboortejaar} is aan de beurt. MAAK NU EEN VACCINATIE AFSPRAAK!!')
                 time.sleep(10*delay)
-        open(str(geboortejaar), 'a').close()  # write flag
+        with open(str(geboortejaar), 'a') as f:
+            f.write(time.ctime())  # write flag
         break
