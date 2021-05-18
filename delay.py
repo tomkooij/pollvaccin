@@ -12,7 +12,7 @@ def calc_delay(delay, start_from=7, end_at=22):
     t = datetime.datetime.today()
     tnext = t + datetime.timedelta(days=1)
     if t.hour >= end_at:
-        return seconds_until(tnext.year, tnext.month, tnext.day, t.hour)
+        return seconds_until(tnext.year, tnext.month, tnext.day, start_from)
     elif t.hour < start_from:
         return seconds_until(t.year, t.month, t.day, start_from)
     else:
