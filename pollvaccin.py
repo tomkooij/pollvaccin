@@ -5,6 +5,7 @@ import re
 import time
 import os
 import datetime
+import random
 from requests.models import HTTPError
 
 
@@ -42,9 +43,9 @@ def poll_site(location="gouda"):
 
 def parse_priklocatie(s):
     """
-    Locatie #95 (17.99 km)   Heeft geen vaccins
+    Locatie #95   Heeft geen vaccins
     
-    return id, dist (hele km)
+    return id 
     """
     m = re.match(r".*#(\d+)", s)
     if m:
@@ -57,6 +58,10 @@ priklocatie_status = {}
 print('Start...')
 while True:
 
+    if random.randint(1, 250) == 42:
+        # heartbeat
+        send_signal_msg(time.ctime()+'We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
+    
     if not daytime():
         print('geen vaccins in de nacht... morgen weer verder!')
         time.sleep(3600)
@@ -75,14 +80,24 @@ while True:
             priklocatie = priklocatie.replace('Gegevens pas beschikbaar tijdens prikmoment.', '')
 
             id = parse_priklocatie(priklocatie)
-            priklocatie_status[id] = priklocatie
             if "heeftgeenvaccins" not in priklocatie.replace(' ','').lower():
                 print('Locatie heeft mogelijk vaccins!', priklocatie)
                 send_signal_msg(time.ctime()+priklocatie)
 
-    print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
-    print(priklocatie_status)    
-    time.sleep(300)
+            hash = priklocatie.replace(' ', '')
+            status = priklocatie_status.get(id, None)
+            if status is None:
+                print('Nieuwe locatie', id)
+                send_signal_msg('Nieuwe locatie: '+priklocatie)
+            elif status == hash:
+                continue
+            priklocatie_status[id] = hash 
+            print('Locatie status is veranderd!', id, priklocatie)
+            send_signal_msg(time.ctime()+priklocatie)
+
+        print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
+        print(priklocatie_status)    
+        time.sleep(60)
 
 
 
