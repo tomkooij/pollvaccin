@@ -9,17 +9,17 @@ import random
 from requests.models import HTTPError
 
 from delay import calc_delay
-from Config import SENDER, RCPT
+from Config import SENDER, RCPT, DEBUG
+
 
 url = "https://www.prullenbakvaccin.nl/"
 
-  
 
-def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=True):
+def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=DEBUG):
     syscall = f'signal-cli -u {sender} send -m \"{msg}\" {rcpt}'
-    if debug:
-        print(syscall)
-    #os.system(syscall)
+    print(syscall)
+    if not debug:  
+        os.system(syscall)
 
 
 def poll_site(location="gouda"):
