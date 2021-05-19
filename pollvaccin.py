@@ -46,10 +46,10 @@ def parse_priklocatie(s):
     
     return id, dist (hele km)
     """
-    m = re.match(r".*#(\d+).*\((\d+).\d+ km\)", s)
+    m = re.match(r".*#(\d+)", s)
     if m:
-        id, dist = map(int, m.groups())
-    return id, dist
+        return int(m.groups()[0])
+    return -999
 
 
 priklocatie_status = {}
@@ -64,26 +64,24 @@ while True:
 
     soup = poll_site("gouda")
     if soup:
+        
         priklocaties = soup.find_all("div", {"class": "card-body"})
 
         for priklocatie in priklocaties:
+            # verwijder <span style='display:none'>scrapen heeft geen zin</span>
+            for decoy in priklocatie.find_all('span', style="display:none"):
+                decoy.decompose()
             priklocatie = priklocatie.text.replace('\n', ' ')
             priklocatie = priklocatie.replace('Gegevens pas beschikbaar tijdens prikmoment.', '')
 
-            id, dist = parse_priklocatie(priklocatie)
-            if dist < 5:
-                hash = priklocatie.replace(' ', '')
-                status = priklocatie_status.get(id, None)
-                if status is None:
-                    print('Nieuwe locatie binnen fietsafstand.', id, dist)
-                    send_signal_msg('Nieuwe locatie: '+priklocatie)
-                elif status == hash:
-                    continue
-                priklocatie_status[id] = hash 
-                print('Locatie status is veranderd!', id, priklocatie)
+            id = parse_priklocatie(priklocatie)
+            priklocatie_status[id] = priklocatie
+            if "heeftgeenvaccins" not in priklocatie.replace(' ','').lower():
+                print('Locatie heeft mogelijk vaccins!', priklocatie)
                 send_signal_msg(time.ctime()+priklocatie)
 
-    print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))    
+    print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
+    print(priklocatie_status)    
     time.sleep(300)
 
 
