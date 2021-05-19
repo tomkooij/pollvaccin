@@ -8,17 +8,12 @@ import datetime
 import random
 from requests.models import HTTPError
 
-
+from delay import calc_delay
 from Config import SENDER, RCPT
 
 url = "https://www.prullenbakvaccin.nl/"
 
-
-def daytime():
-    now = datetime.datetime.now()
-    now_time = now.time()
-    return now_time < datetime.time(20,00) and now_time >= datetime.time(7,00) 
-    
+  
 
 def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=True):
     syscall = f'signal-cli -u {sender} send -m \"{msg}\" {rcpt}'
@@ -53,52 +48,57 @@ def parse_priklocatie(s):
     return -999
 
 
-priklocatie_status = {}
+def main():
+    priklocatie_status = {}
+    last_msg = '' 
 
-print('Start...')
-while True:
+    print('Start...')
+    while True:
 
-    if random.randint(1, 250) == 42:
-        # heartbeat
-        send_signal_msg(time.ctime()+'We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
-    
-    if not daytime():
-        print('geen vaccins in de nacht... morgen weer verder!')
-        time.sleep(3600)
-        continue
+        if random.randint(1, 250) == 42:
+            # heartbeat
+            send_signal_msg(time.ctime()+'We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
+                
+        soup = poll_site("gouda")
+        if soup:
+            
+            priklocaties = soup.find_all("div", {"class": "card-body"})
 
-    soup = poll_site("gouda")
-    if soup:
-        
-        priklocaties = soup.find_all("div", {"class": "card-body"})
+            for priklocatie in priklocaties:
+                # verwijder <span style='display:none'>scrapen heeft geen zin</span>
+                for decoy in priklocatie.find_all('span', style="display:none"):
+                    decoy.decompose()
+                priklocatie = priklocatie.text.replace('\n', ' ')
+                priklocatie = priklocatie.replace('Gegevens pas beschikbaar tijdens prikmoment.', '')
 
-        for priklocatie in priklocaties:
-            # verwijder <span style='display:none'>scrapen heeft geen zin</span>
-            for decoy in priklocatie.find_all('span', style="display:none"):
-                decoy.decompose()
-            priklocatie = priklocatie.text.replace('\n', ' ')
-            priklocatie = priklocatie.replace('Gegevens pas beschikbaar tijdens prikmoment.', '')
-
-            id = parse_priklocatie(priklocatie)
-            if "heeftgeenvaccins" not in priklocatie.replace(' ','').lower():
-                print('Locatie heeft mogelijk vaccins!', priklocatie)
+                id = parse_priklocatie(priklocatie)
+                hash = priklocatie.replace(' ', '')[:20]
+                
+                if id == -999: # geen locatie id, dus hoogstwaarschijnlijk vaccin
+                    if last_msg == hash:
+                        print('Bericht al gestuurd...')
+                        continue
+                    last_msg = hash
+            
+                status = priklocatie_status.get(id, None)
+                if status is None:
+                    print('Nieuwe locatie', id)
+                    send_signal_msg('Nieuwe locatie: '+priklocatie)
+                elif status == hash:
+                    continue
+                priklocatie_status[id] = hash 
+                print('Locatie status is veranderd!', id, priklocatie)
                 send_signal_msg(time.ctime()+priklocatie)
 
-            hash = priklocatie.replace(' ', '')
-            status = priklocatie_status.get(id, None)
-            if status is None:
-                print('Nieuwe locatie', id)
-                send_signal_msg('Nieuwe locatie: '+priklocatie)
-            elif status == hash:
-                continue
-            priklocatie_status[id] = hash 
-            print('Locatie status is veranderd!', id, priklocatie)
-            send_signal_msg(time.ctime()+priklocatie)
-
-        print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
-        print(priklocatie_status)    
-        time.sleep(60)
+            print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
+            print(priklocatie_status)    
+            delay = calc_delay(60)
+            time.sleep(delay)
 
 
-
+if __name__=='__main__':
+    try:
+        main()
+    except Exception as e:
+        send_signal_msg('Pollvaccin stopped!')
     
