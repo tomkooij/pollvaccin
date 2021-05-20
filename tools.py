@@ -1,5 +1,14 @@
 import datetime
 
+from Config import SENDER, RCPT, DEBUG
+
+
+def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=DEBUG):
+    syscall = f'signal-cli -u {sender} send -m \"{msg}\" {rcpt}'
+    print(syscall)
+    if not debug:  
+        os.system(syscall)
+
 
 def seconds_until(year, month, day, hour):
     t = datetime.datetime(year, month, day, hour)

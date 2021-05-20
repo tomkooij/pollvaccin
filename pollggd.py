@@ -6,15 +6,7 @@ import time
 import os
 from requests.models import HTTPError
 
-from Config import SENDER, RCPT, DEBUG
-from delay import calc_delay   
-
-
-def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=DEBUG):
-    syscall = f'signal-cli -u {sender} send -m \"{msg}\" {rcpt}'
-    print(syscall)
-    if not debug:  
-        os.system(syscall)
+from tools import calc_delay, send_signal_msg   
 
 
 def is_geboortejaar_aan_de_beurt(jaar):
@@ -67,5 +59,5 @@ if __name__=='__main__':
     try:
         main()
     except Exception as e:
-        send_signal_msg('Pollvaccin stopped!')
+        send_signal_msg('Pollggd stopped!')
 
