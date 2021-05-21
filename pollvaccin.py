@@ -22,6 +22,7 @@ def poll_site(location="gouda"):
         r.raise_for_status()
     except requests.exceptions.HTTPError as e:
         print (e.response.text)
+        time.sleep(10)  # sleep to prevent hammering site
         return None
 
     soup = BeautifulSoup(r.text, 'html.parser')
@@ -43,7 +44,6 @@ def parse_priklocatie(s):
 def main():
     priklocatie_status = {}
     last_msg = '' 
-
     print('Start...')
     while True:
 
@@ -84,8 +84,8 @@ def main():
 
             print('We volgen %d priklocaties in de buurt...' % len(priklocatie_status))
             print(priklocatie_status)    
-            delay = calc_delay(60)
-            time.sleep(delay)
+        delay = calc_delay(60)
+        time.sleep(delay)
 
 
 if __name__=='__main__':
