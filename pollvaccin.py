@@ -6,6 +6,8 @@ import time
 import os
 import datetime
 import random
+import cloudscraper
+
 from requests.models import HTTPError
 
 from tools import calc_delay, send_signal_msg
@@ -16,9 +18,11 @@ url = "https://www.prullenbakvaccin.nl/"
 
 def poll_site(location="gouda"):
     """poll site for location and return list of locations"""
-    
+
+    # 21-5-2021: use `pip install cloudscraper` to bypass CloudFlare captcha   
     try:
-        r = requests.get(url + location)
+        scraper = cloudscraper.create_scraper()
+        r = scraper.get(url + location)
         r.raise_for_status()
     except requests.exceptions.HTTPError as e:
         print (e.response.text)
@@ -44,7 +48,6 @@ def parse_priklocatie(s):
 def main():
     priklocatie_status = {}
     last_msg = '' 
-git
     print('Start...')
     while True:
 
