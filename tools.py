@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from Config import SENDER, RCPT, DEBUG
 
