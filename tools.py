@@ -14,8 +14,7 @@ def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=DEBUG):
 def seconds_until(year, month, day, hour):
     t = datetime.datetime(year, month, day, hour)
     tnow = datetime.datetime.today()
-    print(f'{tnow} until ')
-    return int((t - tnow).total_seconds())
+    return max(1, int((t - tnow).total_seconds()))
 
 
 def calc_delay(delay, start_from=7, end_at=22):
