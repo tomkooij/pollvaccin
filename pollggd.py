@@ -14,6 +14,10 @@ def send_msg(msg):
     send_signal_msg(msg)
 
 
+def get_semaphore_fn(geboortejaar):
+    return 'cohorten\\' + str(geboortejaar)
+
+
 def is_geboortejaar_aan_de_beurt(jaar):
     url = 'https://user-api.coronatest.nl/vaccinatie/programma/bepaalbaar/{geboortejaar}/NEE/NEE'
 
@@ -31,7 +35,7 @@ def is_geboortejaar_aan_de_beurt(jaar):
 def main():
     for geboortejaar in range(1961, 1980):
         print('We wachten op: ', geboortejaar)
-        if os.path.exists(str(geboortejaar)):
+        if os.path.exists(get_semaphore_fn(geboortejaar)):
             print('Dit jaar is al ontdekt. Skipping...')
             continue
 
@@ -47,7 +51,7 @@ def main():
                 delay = calc_delay(300)  # slaap 's nachts.
                 print(f'Sleeping {delay} seconds.')
                 time.sleep(delay)
-                continue 
+                continue
             print(f'{geboortejaar} is NU AAN DE BEURT!!!!')
             send_msg(f'{time.ctime()} Jaargang {geboortejaar} kan nu een afspraak maken!')
             if geboortejaar == 1975:
@@ -55,14 +59,14 @@ def main():
                     # ALERT ALERT!
                     send_msg(f'{time.ctime()} {geboortejaar} is aan de beurt. MAAK NU EEN VACCINATIE AFSPRAAK!!')
                     time.sleep(10*delay)
-            with open(str(geboortejaar), 'a') as f:
+            with open(get_semaphore_fn(geboortejaar), 'a') as f:
                 f.write(time.ctime())  # write flag
             break
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     try:
         main()
     except Exception as e:
         send_msg('Pollggd stopped!')
-
+        print(str(e))
