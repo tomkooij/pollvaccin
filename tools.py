@@ -1,7 +1,18 @@
 import datetime
 import os
+import requests
 
-from Config import SENDER, RCPT, DEBUG
+from Config import SENDER, RCPT, DEBUG, BOT_TOKEN, RCPT_USER_ID
+
+
+def send_telegram_msg(msg, rcpt_user_id=RCPT_USER_ID, bot_token=BOT_TOKEN):
+    
+    api_call = f'https://api.telegram.org/bot{bot_token}' + \
+               f'/sendMessage?chat_id={rcpt_user_id}' + \
+               f'&parse_mode=Markdown&text={msg}'
+
+    r = requests.get(api_call)
+    return r
 
 
 def send_signal_msg(msg, sender=SENDER, rcpt=RCPT, debug=DEBUG):
@@ -29,7 +40,10 @@ def calc_delay(delay, start_from=7, end_at=22):
 
 
 if __name__ == '__main__':
-    dt = datetime.datetime.today()
-    print(dt)
-    print(seconds_until(2021, 5, 18, 7))
-    print(calc_delay(42, start_from=5, end_at=7))
+    #dt = datetime.datetime.today()
+    #print(dt)
+    #print(seconds_until(2021, 5, 18, 7))
+    #print(calc_delay(42, start_from=5, end_at=7))
+    #send_telegram_msg('Foobar was here!')
+    send_telegram_msg('Are you listening?')
+

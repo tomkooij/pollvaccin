@@ -6,7 +6,12 @@ import time
 import os
 from requests.models import HTTPError
 
-from tools import calc_delay, send_signal_msg   
+from tools import calc_delay, send_signal_msg, send_telegram_msg
+
+
+def send_msg(msg):
+    send_telegram_msg(msg)
+    send_signal_msg(msg)
 
 
 def is_geboortejaar_aan_de_beurt(jaar):
@@ -44,11 +49,11 @@ def main():
                 time.sleep(delay)
                 continue 
             print(f'{geboortejaar} is NU AAN DE BEURT!!!!')
-            send_signal_msg(f'{time.ctime()} Jaargang {geboortejaar} kan nu een afspraak maken!')
+            send_msg(f'{time.ctime()} Jaargang {geboortejaar} kan nu een afspraak maken!')
             if geboortejaar == 1975:
                 for delay in range(1, 10):
                     # ALERT ALERT!
-                    send_signal_msg(f'{time.ctime()} {geboortejaar} is aan de beurt. MAAK NU EEN VACCINATIE AFSPRAAK!!')
+                    send_msg(f'{time.ctime()} {geboortejaar} is aan de beurt. MAAK NU EEN VACCINATIE AFSPRAAK!!')
                     time.sleep(10*delay)
             with open(str(geboortejaar), 'a') as f:
                 f.write(time.ctime())  # write flag
@@ -59,5 +64,5 @@ if __name__=='__main__':
     try:
         main()
     except Exception as e:
-        send_signal_msg('Pollggd stopped!')
+        send_msg('Pollggd stopped!')
 
