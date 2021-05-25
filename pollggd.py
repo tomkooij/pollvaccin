@@ -15,7 +15,7 @@ def send_msg(msg):
 
 
 def get_semaphore_fn(geboortejaar):
-    return 'cohorten\\' + str(geboortejaar)
+    return 'cohorten/' + str(geboortejaar)
 
 
 def is_geboortejaar_aan_de_beurt(jaar):
