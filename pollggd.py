@@ -10,8 +10,7 @@ from tools import calc_delay, send_signal_msg, send_telegram_msg
 
 
 def send_msg(msg):
-    send_telegram_msg(msg)
-    send_signal_msg(msg)
+    send_telegram_msg(f'{time.ctime()} :{msg}')
 
 
 def get_semaphore_fn(geboortejaar):
@@ -53,12 +52,8 @@ def main():
                 time.sleep(delay)
                 continue
             print(f'{geboortejaar} is NU AAN DE BEURT!!!!')
-            send_msg(f'{time.ctime()} Jaargang {geboortejaar} kan nu een afspraak maken!')
-            if geboortejaar == 1975:
-                for delay in range(1, 10):
-                    # ALERT ALERT!
-                    send_msg(f'{time.ctime()} {geboortejaar} is aan de beurt. MAAK NU EEN VACCINATIE AFSPRAAK!!')
-                    time.sleep(10*delay)
+            send_msg(f'Jaargang {geboortejaar} kan nu een afspraak maken!')
+            
             with open(get_semaphore_fn(geboortejaar), 'a') as f:
                 f.write(time.ctime())  # write flag
             break
