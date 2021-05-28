@@ -10,7 +10,7 @@ from tools import calc_delay, send_signal_msg, send_telegram_msg
 
 
 def send_msg(msg):
-    send_telegram_msg(f'{time.ctime()} :{msg}')
+    send_telegram_msg(f'{time.ctime()}: {msg}')
 
 
 def get_semaphore_fn(geboortejaar):
