@@ -62,6 +62,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+    except KeyboardInterrupt:
+        print('KeyboardInterrupt!')
     except Exception as e:
         send_msg('Pollggd stopped!')
         print(str(e))
