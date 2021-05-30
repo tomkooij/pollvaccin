@@ -32,7 +32,7 @@ def is_geboortejaar_aan_de_beurt(jaar):
 
 
 def main():
-    for geboortejaar in range(1961, 1980):
+    for geboortejaar in range(1961, 1995):
         print('We wachten op: ', geboortejaar)
         if os.path.exists(get_semaphore_fn(geboortejaar)):
             print('Dit jaar is al ontdekt. Skipping...')
@@ -56,7 +56,7 @@ def main():
             
             with open(get_semaphore_fn(geboortejaar), 'a') as f:
                 f.write(time.ctime())  # write flag
-            break
+    send_msg('Pollggd finished!')
 
 
 if __name__ == '__main__':
