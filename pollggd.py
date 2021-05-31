@@ -56,6 +56,9 @@ def main():
             
             with open(get_semaphore_fn(geboortejaar), 'a') as f:
                 f.write(time.ctime())  # write flag
+            
+            break  # op naar het volgende jaar
+
     send_msg('Pollggd finished!')
 
 
