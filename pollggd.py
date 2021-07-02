@@ -32,7 +32,7 @@ def is_geboortejaar_aan_de_beurt(jaar):
 
 
 def main():
-    for geboortejaar in range(1961, 1995):
+    for geboortejaar in range(1961, 2015):
         print('We wachten op: ', geboortejaar)
         if os.path.exists(get_semaphore_fn(geboortejaar)):
             print('Dit jaar is al ontdekt. Skipping...')
@@ -55,7 +55,9 @@ def main():
             send_msg(f'Jaargang {geboortejaar} kan nu een afspraak maken!')
             
             with open(get_semaphore_fn(geboortejaar), 'a') as f:
-                f.write(time.ctime())  # write flag
+                 f.write(time.ctime())  # write flag
+            break
+
     send_msg('Pollggd finished!')
 
 
