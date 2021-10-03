@@ -7,11 +7,19 @@ from Config import SENDER, RCPT, DEBUG, BOT_TOKEN, RCPT_USER_ID
 
 def send_telegram_msg(msg, rcpt_user_id=RCPT_USER_ID, bot_token=BOT_TOKEN):
     
+    # fix special characters
+    # Error: Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 30
+    msg = msg.replace('_', '-')
+    msg = msg.replace('*', '0')
+
     api_call = f'https://api.telegram.org/bot{bot_token}' + \
                f'/sendMessage?chat_id={rcpt_user_id}' + \
                f'&parse_mode=Markdown&text={msg}'
 
     r = requests.get(api_call)
+    if r.status_code != 200:
+        print('Telegram API returned: ', r.status_code)
+        print(r.text)
     return r
 
 
@@ -45,5 +53,5 @@ if __name__ == '__main__':
     #print(seconds_until(2021, 5, 18, 7))
     #print(calc_delay(42, start_from=5, end_at=7))
     #send_telegram_msg('Foobar was here!')
-    send_telegram_msg('Are you listening?')
+    send_telegram_msg('Are you _listening_ ? ***')
 
