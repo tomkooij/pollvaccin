@@ -14,11 +14,11 @@ def send_msg(msg):
 
 
 def get_semaphore_fn(geboortejaar):
-    return 'cohorten/' + str(geboortejaar)
+    return 'booster/' + str(geboortejaar)
 
 
 def is_geboortejaar_aan_de_beurt(jaar):
-    url = 'https://user-api.coronatest.nl/vaccinatie/programma/bepaalbaar/{geboortejaar}/NEE/NEE'
+    url = 'https://user-api.coronatest.nl/vaccinatie/programma/booster/{geboortejaar}/NEE/'
 
     try:
         r = requests.get(url.format(geboortejaar=str(jaar)))
@@ -32,7 +32,7 @@ def is_geboortejaar_aan_de_beurt(jaar):
 
 
 def main():
-    for geboortejaar in range(1961, 1995):
+    for geboortejaar in range(1935, 1995):
         print('We wachten op: ', geboortejaar)
         if os.path.exists(get_semaphore_fn(geboortejaar)):
             print('Dit jaar is al ontdekt. Skipping...')
